@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fluidic Body: Swarm Robots as a Fluid Extension of the Hand</title>
+<meta name="description" content="Fluidic Body lets a person operate a swarm of fluid-imitating robots as an extension of the hand. ACM ISS 2026 (PACM HCI).">
+<meta property="og:title" content="Fluidic Body: Swarm Robots as a Fluid Extension of the Hand">
+<meta property="og:description" content="A virtual fluid links the hand and a robot swarm: open the hand to soften the swarm, close it to harden it. ACM ISS 2026.">
+<meta property="og:image" content="https://tamago117.github.io/FluidicBody/static/images/teaser.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff; --bg-alt:#f4f8fb; --fg:#1b2430; --muted:#5b6876; --line:#dfe6ec;
+  --accent:#1e88c8; --accent-soft:#e3f2fb; --hard:#d6453d; --soft:#2f6fd6;
+  --card:#ffffff; --code:#0f1720; --code-fg:#e6edf3;
+  --maxw:1040px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+img,video{max-width:100%;display:block}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+section{padding:56px 0}
+section.alt{background:var(--bg-alt)}
+h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.1;margin:0 0 6px;font-weight:800;letter-spacing:-.02em}
+h1 .sub{display:block;font-size:.5em;font-weight:600;color:var(--muted);letter-spacing:-.01em;margin-top:10px}
+h2{font-size:1.75rem;margin:0 0 18px;letter-spacing:-.01em}
+h3{font-size:1.15rem;margin:28px 0 10px}
+p{margin:0 0 14px}
+.lead{font-size:1.08rem}
+.muted{color:var(--muted)}
+.center{text-align:center}
+
+/* header */
+header{padding:64px 0 28px;text-align:center;background:radial-gradient(1200px 400px at 50% -80px,var(--accent-soft),transparent 70%)}
+.venue{display:inline-block;font-weight:600;font-size:.88rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 12px;border-radius:999px;margin-bottom:18px}
+.authors{margin:22px 0 4px;font-size:1.1rem;font-weight:500}
+.authors span{white-space:nowrap;margin:0 8px}
+.affils{color:var(--muted);font-size:.95rem}
+.affils span{white-space:nowrap;margin:0 8px}
+.buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:26px 0 8px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:999px;background:var(--fg);color:#fff;font-weight:600;font-size:.95rem}
+.btn:hover{text-decoration:none;opacity:.86}
+.btn svg{width:18px;height:18px;fill:currentColor}
+.logos{display:flex;justify-content:center;align-items:center;gap:34px;flex-wrap:wrap;margin-top:26px}
+.logos img{height:34px;width:auto;opacity:.9}
+
+/* media */
+.video-embed{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px rgba(20,40,60,.18);background:#000}
+.video-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+figure{margin:0}
+figcaption{font-size:.92rem;color:var(--muted);margin-top:10px;line-height:1.5}
+.fig{border-radius:12px;overflow:hidden}
+.fig img,.fig video{width:100%;height:auto}
+video{border-radius:10px;background:#111;width:100%;height:auto}
+.grid{display:grid;gap:22px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.tag{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 9px;border-radius:6px;margin-bottom:8px}
+.tag.soft{background:#e4ecfb;color:var(--soft)}
+.tag.hard{background:#fbe6e4;color:var(--hard)}
+.tag.base{background:#fdeedd;color:#b5651d}
+.q{font-weight:600;border-left:4px solid var(--accent);padding:4px 0 4px 14px;margin:6px 0 18px}
+.a{background:var(--accent-soft);border-radius:10px;padding:12px 16px;margin:18px 0 0;font-weight:500}
+
+/* mapping cards */
+.map-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center}
+.map-card img{margin:0 auto 12px;max-height:170px;width:auto}
+.map-card h4{margin:0 0 6px;font-size:1.02rem}
+.map-card p{font-size:.92rem;color:var(--muted);margin:0}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px;text-align:center}
+.stat b{display:block;font-size:2rem;line-height:1.1;color:var(--accent);font-weight:800}
+.stat span{font-size:.9rem;color:var(--muted)}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:.93rem;margin:6px 0}
+.tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl thead th{font-weight:600;color:var(--muted);font-size:.85rem}
+.tbl .best{font-weight:700;color:var(--fg)}
+.tbl-wrap{overflow-x:auto}
+
+/* related */
+.rel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.rel-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column}
+.rel-card .kind{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.rel-card h4{margin:6px 0 4px;font-size:1.08rem;line-height:1.35}
+.rel-card .meta{font-size:.88rem;color:var(--muted);margin-bottom:10px}
+.rel-card p{font-size:.95rem;margin-bottom:12px}
+.rel-card .links{margin-top:auto;display:flex;flex-wrap:wrap;gap:14px;font-weight:600;font-size:.92rem}
+
+/* robot */
+.robot{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:center}
+
+pre{background:var(--code);color:var(--code-fg);padding:20px 22px;border-radius:12px;overflow-x:auto;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85rem;line-height:1.55;margin:0}
+.copy{float:right;margin:-4px 0 10px 10px;background:var(--fg);color:#fff;border:0;border-radius:8px;padding:6px 12px;font:600 .85rem Inter,sans-serif;cursor:pointer}
+nav.toc{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:22px;overflow-x:auto;white-space:nowrap;padding-top:10px;padding-bottom:10px;font-size:.92rem;font-weight:500}
+nav.toc a{color:var(--muted)}
+nav.toc a:hover{color:var(--fg);text-decoration:none}
+footer{padding:36px 0 48px;font-size:.88rem;color:var(--muted);text-align:center;border-top:1px solid var(--line)}
+
+@media (max-width:820px){
+  .g3,.g5{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rel,.robot{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  .wrap{padding:0 16px}
+  section{padding:42px 0}
+  .g2,.g3{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr}
+  .authors span,.affils span{display:inline-block;margin:0 6px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="venue">ACM ISS 2026 · PACM HCI · Turin, Italy</div>
+    <h1>Fluidic Body<span class="sub">Swarm Robots as a Fluid Extension of the Hand</span></h1>
+    <div class="authors">
+      <span><a href="https://mvml.slis.tsukuba.ac.jp/">Michikuni Eguchi</a><sup>1,2</sup></span>
+      <span><a href="https://shigeodayo.me/">Shigeo Yoshida</a><sup>3</sup></span>
+      <span>Mai Nishimura<sup>3</sup></span>
+      <span>Takefumi Hiraki<sup>1,2</sup></span>
+    </div>
+    <div class="affils">
+      <span><sup>1</sup>University of Tsukuba</span>
+      <span><sup>2</sup>Cluster Metaverse Lab</span>
+      <span><sup>3</sup>OMRON SINIC X Corporation</span>
+    </div>
+    <div class="buttons">
+      <a class="btn" href="https://doi.org/10.1145/3859323"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zM14 3.5V8h4.5z"/></svg>Paper (ACM DL)</a>
+      <a class="btn" href="https://arxiv.org/abs/2611.06068"><svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 5h16v2H4zm0 5h10v2H4zm0 5h10v2H4z"/></svg>arXiv</a>
+      <a class="btn" href="https://www.alphaxiv.org/abs/2611.06068"><svg viewBox="0 0 24 24"><path d="M12 2 2 22h4l2-4.5h8l2 4.5h4zM9.5 14 12 8l2.5 6z"/></svg>alphaXiv</a>
+      <a class="btn" href="https://youtu.be/XmEpxQirQEE"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Video</a>
+      <a class="btn" href="#bibtex"><svg viewBox="0 0 24 24"><path d="M8 3H6a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h2v-2H6v-4a3 3 0 0 0-1.4-2.5A3 3 0 0 0 6 9V5h2zm8 0h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-2v-2h2v-4a3 3 0 0 1 1.4-2.5A3 3 0 0 1 18 9V5h-2z"/></svg>BibTeX</a>
+    </div>
+  </div>
+</header>
+
+<section style="padding-top:20px">
+  <div class="wrap">
+    <div class="video-embed">
+      <iframe src="https://www.youtube.com/embed/XmEpxQirQEE?rel=0" title="Fluidic Body video" loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+  </div>
+</section>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#abstract">Abstract</a>
+    <a href="#concept">Concept</a>
+    <a href="#method">Method</a>
+    <a href="#technical">Technical Evaluation</a>
+    <a href="#userstudy">VR User Study</a>
+    <a href="#demo">Real-World Demo</a>
+    <a href="#applications">Applications</a>
+    <a href="#related">Related Projects</a>
+    <a href="#bibtex">BibTeX</a>
+  </div>
+</nav>
+
+<section id="abstract">
+  <div class="wrap">
+    <figure class="fig" style="margin-bottom:30px">
+      <img src="static/images/teaser.jpg" alt="Fluidic Body teaser: the hand defines a region of virtual fluid that the robots fill; a soft swarm flows around obstacles and a hard swarm pushes objects." width="2000" height="624">
+      <figcaption>Fluidic Body lets a person operate a swarm of fluid-imitating robots as an extension of the hand. The hand defines a region of virtual fluid, and the robots fill it. Changing the fluid's properties through hand movements adapts the swarm to the task: a <b style="color:var(--soft)">soft</b> formation flows around obstacles, and a <b style="color:var(--hard)">hard</b> formation pushes objects.</figcaption>
+    </figure>
+    <h2>Abstract</h2>
+    <p>Swarm robots have attracted growing interest as a physical interface for human–computer interaction, since a swarm can reshape its formation to fit the objects and surroundings it works with. For a human operator, however, adapting the swarm's behavior remains difficult. Most existing methods require the user to specify where the swarm should go, and they offer no intuitive way to change the collective's behavior as each task demands. We present <b>Fluidic Body</b>, a system that lets a person operate a swarm of fluid-imitating robots as an extension of the hand. The system places a virtual fluid between the hand and the swarm, and the user adapts the swarm's behavior to each task by changing the fluid's properties through simple hand movements. When the user opens the hand, the swarm becomes soft enough to deform and flow around obstacles. Closing the hand turns it into a hard, cohesive body that can push objects. We evaluated the controller's performance and its operability in two simulation experiments and one demonstration with physical robots. First, our controller handled both obstacle avoidance and object transportation better than an existing method that behaves the same way in every task. Second, in a VR user study, 17 participants completed the combined avoidance-and-transportation task faster and more reliably than with that method. They also reported a lower workload and a stronger sense of agency. Finally, this experience carried over to physical robots in a real-world demonstration (88 participants). These results suggest that treating a swarm as a fluid, a material people already understand, allows a robot swarm to work as a deformable extension of the human body.</p>
+  </div>
+</section>
+
+<section id="concept" class="alt">
+  <div class="wrap">
+    <h2>A hand that changes the swarm</h2>
+    <p class="lead">Existing swarm interfaces mostly let a person say <i>where</i> the swarm should go. Fluidic Body lets a person also change <i>how</i> it behaves. A virtual fluid sits between the hand and the swarm: the hand sets the fluid's properties, and the robots behave as that fluid would. Because people already know how fluids move, they can anticipate how the swarm will respond.</p>
+    <div class="grid g2" style="margin-top:26px;align-items:center">
+      <figure>
+        <video src="static/videos/media1.mp4" poster="static/videos/media1.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption>Fluidic Body on physical robots: the swarm follows the user's hand as a fluid.</figcaption>
+      </figure>
+      <figure class="fig" style="background:#fff;border:1px solid var(--line);padding:18px">
+        <img src="static/images/map_soft_hard.png" alt="Soft swarm flows around an obstacle; hard swarm pushes an object" loading="lazy" style="max-height:240px;width:auto;margin:0 auto">
+        <figcaption>Soft to flow around obstacles, hard to push objects.</figcaption>
+      </figure>
+    </div>
+
+    <h3>Hand operation mapping</h3>
+    <p>A hand-tracking camera captures three features of the hand, and each drives one input of the controller.</p>
+    <div class="grid g3">
+      <div class="map-card">
+        <img src="static/images/map_viscosity.png" alt="Open hand: low viscosity; closed hand: high viscosity" loading="lazy">
+        <h4>Hand shape → flexibility</h4>
+        <p>An open hand selects a <b style="color:var(--soft)">soft</b> fluid (low viscosity and density) that deforms and slips through gaps. A closed hand selects a <b style="color:var(--hard)">hard</b> fluid that holds together and pushes objects.</p>
+      </div>
+      <div class="map-card">
+        <img src="static/images/map_height.png" alt="Hand height controls density" loading="lazy">
+        <h4>Hand height → spread</h4>
+        <p>Raising the hand lowers the reference density, which widens the spacing between robots and spreads the formation.</p>
+      </div>
+      <div class="map-card">
+        <img src="static/images/map_outline.png" alt="Hand outline becomes the swarm area" loading="lazy">
+        <h4>Hand outline → shape</h4>
+        <p>The outline of the hand becomes the swarm area, and the formation follows the outline as it changes.</p>
+      </div>
+    </div>
+    <figure style="margin-top:22px;max-width:640px;margin-left:auto;margin-right:auto">
+        <video src="static/videos/media9.mp4" poster="static/videos/media9.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption>Raising and lowering the hand changes the density of the swarm.</figcaption>
+      </figure>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <h2>Method</h2>
+    <figure class="fig">
+      <img src="static/images/overview.png" alt="System design of Fluidic Body" loading="lazy" width="1800" height="736">
+      <figcaption>System design. The controller takes fluid properties and the swarm area as inputs. These are set by the user's hand shape, height, and outline, captured by a hand-tracking camera. The controller simulates a virtual fluid with smoothed particle hydrodynamics (SPH) and treats each robot as one of its particles.</figcaption>
+    </figure>
+    <h3>Fluid swarm controller</h3>
+    <div class="grid g2" style="align-items:center">
+      <div>
+        <p>SPH represents a fluid as a set of particles. Treating each particle as a robot turns the fluid simulation into a controller that makes the swarm imitate fluid behavior. The velocity command of each robot follows from the sum of three forces:</p>
+        <ul>
+          <li><b>Fluid force</b> (SPH pressure and viscosity) makes the swarm behave as a fluid. The <b>viscosity coefficient</b> sets how stiffly the formation moves, and the <b>reference density</b> sets how compact it is.</li>
+          <li><b>Inter-robot repulsion</b> prevents collisions between robots.</li>
+          <li><b>Shape force</b> draws each robot into the area the hand specifies, following a potential field planned over the workspace that steers the robots around obstacles.</li>
+        </ul>
+        <p class="muted">The controller builds on our previous SPH controller for obstacle-unaware navigation (see <a href="#related">Related Projects</a>).</p>
+      </div>
+      <figure class="fig">
+        <img src="static/images/sph.png" alt="SPH particles converted into swarm robots" loading="lazy">
+        <figcaption>Each SPH particle is one robot.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="technical" class="alt">
+  <div class="wrap">
+    <h2>Technical Evaluation (simulation)</h2>
+    <p class="q">Q1. Does matching the fluid properties to each task let the swarm adapt better than a fixed baseline?</p>
+    <p>We compared two fluid settings, <span class="tag soft">Fluid soft</span> and <span class="tag hard">Fluid hard</span>, against an <span class="tag base">RVO</span> baseline (reciprocal velocity obstacles, as used in Swarm Body) that behaves the same way in every task. A swarm of 16 robots followed waypoints in an obstacle-avoidance task and an object-transportation task (50 trials each).</p>
+    <div class="grid g3">
+      <figure>
+        <video src="static/videos/media14.mp4" poster="static/videos/media14.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag hard">Fluid hard</span> Transportation</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media18.mp4" poster="static/videos/media18.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag soft">Fluid soft</span> Transportation</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media17.mp4" poster="static/videos/media17.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag base">RVO</span> Transportation</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media16.mp4" poster="static/videos/media16.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag hard">Fluid hard</span> Avoidance</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media11.mp4" poster="static/videos/media11.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag soft">Fluid soft</span> Avoidance</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media15.mp4" poster="static/videos/media15.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag base">RVO</span> Avoidance</figcaption>
+      </figure>
+    </div>
+    <div class="grid g2" style="margin-top:24px;align-items:center">
+      <figure class="fig" style="background:#fff;border:1px solid var(--line);padding:10px">
+        <img src="static/images/te_success.png" alt="Success rate per controller and task" loading="lazy">
+        <img src="static/images/te_legend.png" alt="Legend: Fluid hard, Fluid soft, RVO" loading="lazy" style="margin-top:6px">
+        <figcaption>Success rate (50 trials per condition).</figcaption>
+      </figure>
+      <figure class="fig" style="background:#fff;border:1px solid var(--line);padding:10px">
+        <img src="static/images/te_time.png" alt="Completion time (Kaplan-Meier)" loading="lazy">
+        <figcaption>Completion time (Kaplan–Meier curves).</figcaption>
+      </figure>
+    </div>
+    <div class="tbl-wrap" style="margin-top:24px">
+      <table class="tbl">
+        <thead><tr><th>Method</th><th>Avoidance success</th><th>Avoidance time (s)</th><th>Transportation success</th><th>Transportation time (s)</th></tr></thead>
+        <tbody>
+          <tr><td>RVO</td><td>16.0% (8/50)</td><td>20.41 ± 0.30</td><td class="best">100.0% (50/50)</td><td>37.77 ± 2.01</td></tr>
+          <tr><td>Fluid soft (ours)</td><td class="best">98.0% (49/50)</td><td>20.56 ± 0.60</td><td>36.0% (18/50)</td><td>45.11 ± 3.05</td></tr>
+          <tr><td>Fluid hard (ours)</td><td>70.0% (35/50)</td><td>19.76 ± 0.13</td><td class="best">100.0% (50/50)</td><td>36.05 ± 0.50</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="a">A1. No single behavior suits both tasks. The soft fluid suits obstacle avoidance and the hard fluid suits object transportation, so switching between them handles both, while the fixed RVO baseline handles only transportation.</p>
+  </div>
+</section>
+
+<section id="userstudy">
+  <div class="wrap">
+    <h2>VR User Study</h2>
+    <p class="q">Q2. Can users complete tasks faster and more reliably by changing the fluid?<br>Q3. Does changing the fluid improve the operating experience?</p>
+    <p>17 participants operated the swarm with tracked hands in VR, in three environments: obstacle avoidance, object transportation, and a combined avoidance-and-transportation task. They used both our <b>Fluid</b> controller (open hand = soft, shown blue; closed hand = hard, shown red) and the <b>RVO</b> baseline, where one robot follows each joint of the hand as in Swarm Body.</p>
+    <div class="grid g2">
+      <figure>
+        <video src="static/videos/media22.mp4" poster="static/videos/media22.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag base">RVO</span> Avoidance &amp; transportation</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media21.mp4" poster="static/videos/media21.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag soft">Fluid</span> Avoidance &amp; transportation — the participant softens the swarm to pass the walls, then hardens it to push the box.</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media24.mp4" poster="static/videos/media24.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag base">RVO</span> Avoidance</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media19.mp4" poster="static/videos/media19.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag soft">Fluid</span> Avoidance</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media25.mp4" poster="static/videos/media25.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag base">RVO</span> Transportation</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media20.mp4" poster="static/videos/media20.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><span class="tag soft">Fluid</span> Transportation</figcaption>
+      </figure>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>100%</b><span>success on the combined task with Fluid (17/17), vs. 47.1% (8/17) with RVO</span></div>
+      <div class="stat"><b>38.5 s</b><span>mean completion time on the combined task with Fluid, vs. 76.9 s with RVO</span></div>
+      <div class="stat"><b>12 / 17</b><span>participants found switching flexibility by hand shape intuitive</span></div>
+    </div>
+
+    <h3>Objective results</h3>
+    <div class="grid g2" style="align-items:end">
+      <figure><img src="static/images/us_success.png" alt="User study success rate" loading="lazy"><figcaption>Success rate</figcaption></figure>
+      <figure><img src="static/images/us_time.png" alt="User study completion time (Kaplan-Meier)" loading="lazy"><figcaption>Completion time (Kaplan–Meier curves)</figcaption></figure>
+    </div>
+    <h3>Subjective results</h3>
+    <div class="grid g3" style="align-items:end">
+      <figure><img src="static/images/us_tlx.png" alt="NASA-TLX workload" loading="lazy"><figcaption>Workload (NASA-TLX) ↓</figcaption></figure>
+      <figure><img src="static/images/us_agency.png" alt="Agency" loading="lazy"><figcaption>Agency ↑</figcaption></figure>
+      <figure><img src="static/images/us_ownership.png" alt="Body ownership" loading="lazy"><figcaption>Body ownership ↑</figcaption></figure>
+    </div>
+    <img src="static/images/us_legend.png" alt="Legend: Fluid (blue), RVO (orange)" loading="lazy" style="margin:14px auto 0;max-width:340px">
+    <p class="a">A2 / A3. The two controllers diverge most on the combined avoidance-and-transportation task: with Fluid, every participant succeeded and finished faster, with a lower workload and a stronger sense of agency.</p>
+  </div>
+</section>
+
+<section id="demo" class="alt">
+  <div class="wrap">
+    <h2>Real-World Demonstration</h2>
+    <p class="q">Q4. Does the operating experience carry over to physical robots?</p>
+    <p>We ran a public demonstration at ACM SIGGRAPH 2025 Emerging Technologies. Visitors guided a physical swarm around everyday objects on a table and carried one into a pick-up zone. Over four exhibition days we collected 88 questionnaire responses.</p>
+    <div class="grid g2" style="align-items:center">
+      <figure>
+        <video src="static/videos/media12.mp4" poster="static/videos/media12.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption>Visitors operating the physical swarm at SIGGRAPH 2025.</figcaption>
+      </figure>
+      <figure class="fig" style="background:#fff;padding:10px">
+        <img src="static/images/setup.png" alt="Setup: projector and camera above the table, hand-tracking camera below" loading="lazy" style="max-height:330px;width:auto;margin:0 auto">
+        <figcaption>A projector above the table localizes the robots, a camera tracks the objects, and a hand-tracking camera on the table captures the user's hand from below.</figcaption>
+      </figure>
+    </div>
+    <div class="grid g2" style="margin-top:24px;align-items:center">
+      <figure class="fig" style="background:#fff;padding:10px">
+        <img src="static/images/questionnaire.png" alt="Questionnaire ratings from the real-world demonstration" loading="lazy">
+        <figcaption>Ratings on a 5-point scale (n = 88): body ownership (M = 3.09), agency (M = 3.81), and effectiveness of flexibility control (M = 3.67).</figcaption>
+      </figure>
+      <div>
+        <p>Agency and the effectiveness of flexibility control were rated clearly above the neutral midpoint, while body ownership stayed close to it. Many participants described the swarm as organic or alive, and some likened it to leading a colony of ants.</p>
+        <p>The most common complaint was latency between the hand and the swarm, which made fine manipulation harder. We discuss this and other limitations in the paper.</p>
+      </div>
+    </div>
+
+    <h3 id="robot">Robot: maru</h3>
+    <div class="robot">
+      <figure class="fig"><img src="static/images/maru.jpg" alt="maru swarm robots" loading="lazy"></figure>
+      <div>
+        <p>We used <b>maru</b>, a tabletop swarm robot developed by OMRON SINIC X. Each robot is a two-wheeled robot 30 mm in diameter carrying a microcontroller, a 2.4 GHz radio module, and two photodiodes. A high-speed projector casts gray-coded patterns onto the table, and each robot decodes them with its photodiodes to recover its own position and orientation.</p>
+        <p><a href="https://omron-sinicx.github.io/maru/">maru project page</a> · <a href="https://github.com/omron-sinicx/maru">GitHub (hardware &amp; software)</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="applications">
+  <div class="wrap">
+    <h2>Applications</h2>
+    <div class="grid g2">
+      <figure>
+        <video src="static/videos/media10.mp4" poster="static/videos/media10.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><b>Navigation in cluttered space.</b> The soft setting deforms the formation around what stands in the way, and the hard setting closes the robots on an object to bring it back — one hand covers both.</figcaption>
+      </figure>
+      <figure>
+        <video src="static/videos/media23.mp4" poster="static/videos/media23.jpg" muted loop playsinline autoplay preload="none"></video>
+        <figcaption><b>Multi-person operation.</b> Each swarm follows the hand that shapes it, so two users can each drive a swarm of their own at the same time.</figcaption>
+      </figure>
+    </div>
+    <p class="muted" style="margin-top:16px">The swarm also takes whatever shape the user outlines, and outlines spanning both hands enable formations a single hand cannot hold (<b>shape representation</b>).</p>
+    <figure class="fig" style="margin-top:30px">
+      <img src="static/images/conclusion.png" alt="Our body, virtual fluid, and swarm robots" loading="lazy">
+      <figcaption>A fluid links our body and the swarm to flexibly change the swarm's behavior.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="related" class="alt">
+  <div class="wrap">
+    <h2>Related Projects</h2>
+    <div class="rel">
+      <div class="rel-card">
+        <div class="kind">Controller · IROS 2024</div>
+        <h4>Robot Swarm Control Based on Smoothed Particle Hydrodynamics for Obstacle-Unaware Navigation</h4>
+        <div class="meta">Michikuni Eguchi, Mai Nishimura, Shigeo Yoshida, Takefumi Hiraki</div>
+        <p>The SPH-based swarm controller that Fluidic Body builds on. The swarm reaches its target as a fluid-like formation and avoids obstacles without sensing the environment, using contact points inferred from the robots' positions and velocities. An extended journal version appeared in <i>Advanced Robotics</i> (2025).</p>
+        <div class="links">
+          <a href="https://mvml.slis.tsukuba.ac.jp/research/sph-navigation/">Project page</a>
+          <a href="https://arxiv.org/abs/2404.16309">arXiv</a>
+          <a href="https://doi.org/10.1080/01691864.2025.2517214">Advanced Robotics</a>
+        </div>
+      </div>
+      <div class="rel-card">
+        <div class="kind">Embodiment · CHI 2024</div>
+        <h4>Swarm Body: Embodied Swarm Robots</h4>
+        <div class="meta">Sosuke Ichihashi, So Kuroki, Mai Nishimura, Kazumi Kasaura, Takefumi Hiraki, Kazutoshi Tanaka, Shigeo Yoshida</div>
+        <p>Swarm robots that act as functional body parts, with the hand as the focus, studied in VR and with real robots. Fluidic Body uses its hand-joint mapping with RVO as the baseline in our evaluations.</p>
+        <div class="links">
+          <a href="https://shigeodayo.me/works/swarm_body/">Project page</a>
+          <a href="https://doi.org/10.1145/3613904.3642870">ACM DL</a>
+        </div>
+      </div>
+      <div class="rel-card">
+        <div class="kind">Demo · SIGGRAPH 2025 Emerging Technologies</div>
+        <h4>FluidicSwarm: Embodiment of Swarm Robots Using Fluid Behavior Imitation</h4>
+        <div class="meta">Michikuni Eguchi, Shigeo Yoshida, Mai Nishimura, Takefumi Hiraki</div>
+        <p>The hands-on demonstration of the fluid-imitating swarm, where the real-world study of Fluidic Body was conducted.</p>
+        <div class="links">
+          <a href="https://doi.org/10.1145/3721257.3734028">ACM DL</a>
+        </div>
+      </div>
+      <div class="rel-card">
+        <div class="kind">Robot platform</div>
+        <h4>maru</h4>
+        <div class="meta">OMRON SINIC X</div>
+        <p>The small two-wheeled tabletop swarm robot with projector-based localization used in our physical demonstration and in Swarm Body.</p>
+        <div class="links">
+          <a href="https://omron-sinicx.github.io/maru/">Project page</a>
+          <a href="https://github.com/omron-sinicx/maru">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="bibtex">
+  <div class="wrap">
+    <h2>BibTeX</h2>
+    <button class="copy" type="button" onclick="copyBib(this)">Copy</button>
+<pre id="bib">@article{eguchi2026fluidicbody,
+  author    = {Eguchi, Michikuni and Yoshida, Shigeo and Nishimura, Mai and Hiraki, Takefumi},
+  title     = {Fluidic Body: Swarm Robots as a Fluid Extension of the Hand},
+  journal   = {Proc. ACM Hum.-Comput. Interact.},
+  volume    = {10},
+  number    = {8},
+  articleno = {ISS011},
+  numpages  = {28},
+  year      = {2026},
+  month     = nov,
+  publisher = {Association for Computing Machinery},
+  doi       = {10.1145/3859323}
+}</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="logos">
+      <img src="static/images/logo_tsukuba.png" alt="University of Tsukuba" loading="lazy">
+      <img src="static/images/logo_cluster.png" alt="Cluster" loading="lazy">
+      <img src="static/images/logo_sinicx.png" alt="OMRON SINIC X" loading="lazy">
+    </div>
+    <p style="margin-top:22px">This work was supported by JSPS KAKENHI Grant Number JP25K22837.</p>
+  </div>
+</footer>
+
+<script>
+function copyBib(b){
+  const t=document.getElementById('bib').innerText;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(
+    ()=>{b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1500)},
+    ()=>{b.textContent='Select & copy';});
+}
+// Play videos only while they are on screen.
+if('IntersectionObserver' in window){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    const v=e.target;
+    if(e.isIntersecting){v.play().catch(()=>{});} else {v.pause();}
+  }),{rootMargin:'200px'});
+  document.querySelectorAll('video').forEach(v=>{v.removeAttribute('autoplay');io.observe(v);});
+}
+</script>
+</body>
+</html>
